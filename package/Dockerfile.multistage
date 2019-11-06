@@ -1,0 +1,39 @@
+FROM golang:1.12.13-alpine as builder
+
+ARG SERVICE_NAME=hello-world-app
+ARG SERVICE_HOME=/opt/${SERVICE_NAME}
+ARG SERVICE_REPO=rawmind0
+ARG SERVICE_SRC=/go/src/github.com/${SERVICE_REPO}/${SERVICE_NAME}
+ARG SERVICE_VERSION=dev
+
+ENV VERSION ${SERVICE_VERSION}
+WORKDIR $SERVICE_SRC/
+COPY . .
+RUN env && \
+    apk add --upgrade --no-cache git make gcc musl-dev && \
+    make test && \
+    make build
+
+FROM rawmind/alpine-base:3.10-1
+
+ARG SERVICE_NAME=hello-world-app
+ARG SERVICE_HOME=/opt/${SERVICE_NAME}
+ARG SERVICE_REPO=rawmind0
+
+#Set environment
+ENV SERVICE_NAME=${SERVICE_NAME} \
+    SERVICE_HOME=${SERVICE_HOME} \
+    SERVICE_USER=rancher \
+    SERVICE_UID=10012 \
+    SERVICE_GROUP=rancher \
+    SERVICE_GID=10012 \
+    PATH=${PATH}:${SERVICE_HOME}
+WORKDIR $SERVICE_HOME/
+COPY --from=builder /go/src/github.com/${SERVICE_REPO}/${SERVICE_NAME}/${SERVICE_NAME} .
+COPY img/ ./
+RUN addgroup -g ${SERVICE_GID} ${SERVICE_GROUP} && \
+    adduser -g "${SERVICE_NAME} user" -D -h ${SERVICE_HOME} -G ${SERVICE_GROUP} -s /sbin/nologin -u ${SERVICE_UID} ${SERVICE_USER} && \
+    chown -R ${SERVICE_USER}:${SERVICE_GROUP} ${SERVICE_HOME} && \
+    setcap 'cap_net_bind_service=+ep' ${SERVICE_HOME}/${SERVICE_NAME}
+USER $SERVICE_USER
+ENTRYPOINT ["/opt/hello-world-app/hello-world-app"]
