@@ -1,0 +1,22 @@
+#!/bin/bash -e
+
+if [ -z ${SERVICE_FQDN} ]; then
+    echo "[ERROR] SERVICE_FQDN is not set"
+    exit 1
+fi
+
+cat << EOF
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hello-world-app-ingress
+spec:
+  rules:
+  - host: ${SERVICE_FQDN}
+    http:
+      paths:
+      - backend:
+          serviceName: hello-world-app-service
+          servicePort: http-port
+        path: /
+EOF

@@ -1,18 +1,22 @@
 PKG_FILES?=$$(find . -name '*.go' |grep -v vendor)
-PKG_NAME?=hello-world-app
-REPO_NAME?=rawmind
-IMAGE_NAME=${REPO_NAME}/${PKG_NAME}
+SERVICE_NAME?=hello-world-app
+SERVICE_FQDN?=${SERVICE_NAME}.test.dev
+SERVICE_REPLICA?=2
 VERSION=$$(sh scripts/version)
 ANSWER_VERSION=$$(curl localhost:8080/version)
 BUILDER_NAME=golang
 BUILDER_VERSION=1.12.13-alpine
 DOCKER_USER?=rawmind
 DOCKER_PASS?=test
+IMAGE_NAME=${DOCKER_USER}/${SERVICE_NAME}:${VERSION}
+K8S_DEPLOYMENT=k8s/${SERVICE_NAME}-deployment.yaml
+K8S_SERVICE=k8s/${SERVICE_NAME}-service.yaml
+K8S_INGRESS=k8s/${SERVICE_NAME}-ingress.yaml
 
 default: app
 
 build: version fmtcheck vet lint
-	CGO_ENABLED=0 go build -ldflags="-w -s -X main.VERSION=$(VERSION) -extldflags -static" -o $(PKG_NAME)
+	CGO_ENABLED=0 go build -ldflags="-w -s -X main.VERSION=$(VERSION) -extldflags -static" -o $(SERVICE_NAME)
 
 test: version fmtcheck
 	@echo "==> Testing code ..."
@@ -54,26 +58,40 @@ version:
 	@echo "==> Version ${VERSION}"
 
 app: version
-	@echo "==> Building app and docker image ${IMAGE_NAME}:${VERSION} ..."
-	@docker build -t ${IMAGE_NAME}:${VERSION} -f package/Dockerfile.multistage .
+	@echo "==> Building app and docker image ${IMAGE_NAME} ..."
+	@docker build -t ${IMAGE_NAME} -f package/Dockerfile.multistage .
 
 apptest: version
-	@echo "==> Testing docker image ${IMAGE_NAME}:${VERSION} ..." 
-	@if [ -n "$$(docker ps -qf name=${PKG_NAME}-${VERSION} 2>&1 /dev/null)" ]; then \
-		docker rm -fv ${PKG_NAME}-${VERSION} > /dev/null; \
+	@echo "==> Testing docker image ${IMAGE_NAME} ..." 
+	@if [ -n "$$(docker ps -qf name=${SERVICE_NAME}-${VERSION} 2>&1 /dev/null)" ]; then \
+		docker rm -fv ${SERVICE_NAME}-${VERSION} > /dev/null; \
 	fi
-	@docker run -td --name ${PKG_NAME}-${VERSION} ${IMAGE_NAME}:${VERSION} > /dev/null
-	@if [ "$$(docker exec -it ${PKG_NAME}-${VERSION} curl -s localhost:8080/version 2>&1 /dev/null)" != "${VERSION}" ]; then \
+	@docker run -td --name ${SERVICE_NAME}-${VERSION} ${IMAGE_NAME} > /dev/null
+	@if [ "$$(docker exec -it ${SERVICE_NAME}-${VERSION} curl -s localhost:8080/version 2>&1 /dev/null)" != "${VERSION}" ]; then \
 		echo "==> ERROR: got version ${answer} expected ${VERSION} ..."; \
-		docker rm -fv ${PKG_NAME}-${VERSION} > /dev/null; \
+		docker rm -fv ${SERVICE_NAME}-${VERSION} > /dev/null; \
 		exit 1; \
 	fi
-	@docker rm -fv ${PKG_NAME}-${VERSION} > /dev/null;
+	@docker rm -fv ${SERVICE_NAME}-${VERSION} > /dev/null;
 
 publish: apptest
-	@echo "==> Publishing docker image ${IMAGE_NAME}:${VERSION} ..."
+	@echo "==> Publishing docker image ${IMAGE_NAME} ..."
 	@echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
-	@docker push ${IMAGE_NAME}:${VERSION}
+	@docker push ${IMAGE_NAME}
+
+k8s_manifests: k8s_deploy k8s_service k8s_ingress
+
+k8s_deploy: 
+	@echo "==> Generating k8s deployment file ${K8S_DEPLOYMENT} ..."
+	@SERVICE_REPLICA=${SERVICE_REPLICA} IMAGE_NAME=${IMAGE_NAME} scripts/build_k8s_deployment > ${K8S_DEPLOYMENT}
+
+k8s_service: 
+	@echo "==> Generating k8s service file ${K8S_SERVICE} ..." 
+	@scripts/build_k8s_service > ${K8S_SERVICE}
+
+k8s_ingress: 
+	@echo "==> Generating k8s ingress file ${K8S_INGRESS} ..."
+	@SERVICE_FQDN=${SERVICE_FQDN} scripts/build_k8s_ingress > ${K8S_INGRESS}
 
 .PHONY: build test vet fmt fmtcheck lint version image imagetest publish
 

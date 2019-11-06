@@ -1,0 +1,58 @@
+#!/bin/bash -e
+
+if [ -z ${IMAGE_NAME} ]; then
+    echo "[ERROR] IMAGE_NAME is not set"
+    exit 1
+fi
+
+SERVICE_REPLICA=${SERVICE_REPLICA:-2}
+
+cat << EOF
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  labels:
+    app: hello-world-app
+  name: hello-world-app
+  namespace: default
+spec:
+  replicas: ${SERVICE_REPLICA}
+  selector:
+    matchLabels:
+      app: hello-world-app
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: hello-world-app
+    spec:
+      containers:
+      - image: ${IMAGE_NAME}
+        imagePullPolicy: Always
+        name: hello-world
+        ports:
+        - name: http-port
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: MY_NODE_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        livenessProbe:
+          tcpSocket:
+            port: http-port
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http-port
+          initialDelaySeconds: 15
+          periodSeconds: 20
+EOF

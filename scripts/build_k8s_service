@@ -1,0 +1,18 @@
+#!/bin/bash -e
+
+cat << EOF
+apiVersion: v1
+kind: Service
+metadata:
+  name: hello-world-app-service
+  namespace: default
+spec:
+  ports:
+  - name: http-port
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: hello-world-app
+  type: NodePort
+EOF

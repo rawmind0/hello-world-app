@@ -7,7 +7,9 @@ It also provides a `/version` uri to get the version of the app.
 
 ## Building from Source
 
-To build `rawmind/hello-world-app` docker image, run `make app`.  To use a custom Docker repository, do `REPO_NAME=custom make image`, which produces a `custom/hello-world-app` image.
+To build `rawmind/hello-world-app` docker image, run `make app`.  
+
+To use a custom Docker repository, do `DOCKER_USER=custom make image`, which produces a `custom/hello-world-app` image.
 
 ## Running Docker Image
 
@@ -15,74 +17,23 @@ To build `rawmind/hello-world-app` docker image, run `make app`.  To use a custo
 
 Run `docker run -td -p <PORT>:8080 rawmind/hello-world-app`.
 
-### K8s
+## Generating K8s manifests
 
-Deployment manifest
-```
-apiVersion: apps/v1beta2
-kind: Deployment
-metadata:
-  labels:
-    app: hello-world-app
-  name: hello-world-app
-  namespace: default
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: hello-world-app
-  strategy:
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
-    type: RollingUpdate
-  template:
-    metadata:
-      labels:
-        app: hello-world-app
-    spec:
-      containers:
-      - image: rawmind/hello-world-app
-        imagePullPolicy: Always
-        name: hello-world
-        ports:
-        - name: http-port
-          containerPort: 8080
-          protocol: TCP
-        env:
-        - name: MY_NODE_IP
-          valueFrom:
-            fieldRef:
-              apiVersion: v1
-              fieldPath: status.hostIP
-        livenessProbe:
-          tcpSocket:
-            port: http-port
-          initialDelaySeconds: 15
-          periodSeconds: 20
-        readinessProbe:
-          httpGet:
-            path: /
-            port: http-port
-          initialDelaySeconds: 15
-          periodSeconds: 20
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: hello-world-app
-  namespace: default
-spec:
-  ports:
-  - port: 8080
-    protocol: TCP
-    targetPort: 8080
-  selector:
-    app: hello-world-app
-  type: NodePort
-```
+K8S manifests are generated under `/k8s` folder. App fqdn for ingress (default hello-world-app.test.dev) and app replica (default: 2) can be overriden setting `SERVICE_FQDN` and `SERVICE_REPLICA` env variables.
 
-Run `kubectl apply -f <DEPLOY_MANIFEST>`
+Run `make k8s_manifests`
+
+### Deployment
+
+Run `make k8s_deploy`
+
+### Service
+
+Run `make k8s_service`
+
+### Ingress
+
+Run `make k8s_ingress`
 
 ## License
 Copyright (c) 2014-2018 [Rancher Labs, Inc.](http://rancher.com)
