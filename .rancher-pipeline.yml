@@ -4,7 +4,7 @@ stages:
   - publishImageConfig:
       dockerfilePath: package/Dockerfile.multistage
       buildContext: .
-      tag: rawmind/hello-world-app:${CICD_GIT_TAG}
+      tag: rawmind/hello-world-app:${CICD_GIT_COMMIT}
       registry: 127.0.0.1:34827
 - name: Deliver
   steps:
