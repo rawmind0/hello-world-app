@@ -1,11 +1,9 @@
 stages:
 - name: Build
   steps:
-  - publishImageConfig:
-      dockerfilePath: package/Dockerfile.multistage
-      buildContext: .
-      tag: rawmind/hello-world-app
-      registry: 127.0.0.1:34410
+  - runScriptConfig:
+      image: docker:19.03.4-dind
+      shellScript: make app
 - name: Deliver
   steps:
   - runScriptConfig:
