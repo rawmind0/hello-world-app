@@ -11,7 +11,7 @@ stages:
   - runScriptConfig:
       image: golang:1.12.13-alpine
       shellScript: |-
-        apk add --upgrade --no-cache git make
+        apk add --upgrade --no-cache git make bash
         make k8s_manifests
   - applyYamlConfig:
       path: k8s/hello-world-app-deployment.yaml
