@@ -33,7 +33,7 @@ spec:
       containers:
       - image: ${IMAGE_NAME}
         imagePullPolicy: Always
-        name: hello-world
+        name: hello-world-app
         ports:
         - name: http-port
           containerPort: 8080

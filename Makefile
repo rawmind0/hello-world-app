@@ -63,7 +63,7 @@ app: version
 
 apptest: version
 	@echo "==> Testing docker image ${IMAGE_NAME} ..." 
-	@if [ -n "$$(docker ps -qf name=${SERVICE_NAME}-${VERSION} 2>&1 /dev/null)" ]; then \
+	@if [ -n "$$(docker ps -qf name=${SERVICE_NAME}-${VERSION})" ]; then \
 		docker rm -fv ${SERVICE_NAME}-${VERSION} > /dev/null; \
 	fi
 	@docker run -td --name ${SERVICE_NAME}-${VERSION} ${IMAGE_NAME} > /dev/null
@@ -79,9 +79,15 @@ publish: apptest
 	@echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
 	@docker push ${IMAGE_NAME}
 
+k8s_deploy: k8s_manifests
+	@echo "==> Generating k8s deployment file ${K8S_DEPLOYMENT} ..."
+	@kubectl apply -f ${K8S_DEPLOYMENT}
+	@kubectl apply -f ${K8S_SERVICE}
+	@kubectl apply -f ${K8S_INGRESS}
+
 k8s_manifests: k8s_deploy k8s_service k8s_ingress
 
-k8s_deploy: 
+k8s_deployment: 
 	@echo "==> Generating k8s deployment file ${K8S_DEPLOYMENT} ..."
 	@SERVICE_REPLICA=${SERVICE_REPLICA} IMAGE_NAME=${IMAGE_NAME} scripts/build_k8s_deployment > ${K8S_DEPLOYMENT}
 
@@ -93,5 +99,5 @@ k8s_ingress:
 	@echo "==> Generating k8s ingress file ${K8S_INGRESS} ..."
 	@SERVICE_FQDN=${SERVICE_FQDN} scripts/build_k8s_ingress > ${K8S_INGRESS}
 
-.PHONY: build test vet fmt fmtcheck lint version image imagetest publish
+.PHONY: build test vet fmt fmtcheck lint version image imagetest publish k8s_manifests k8s_deploy
 
