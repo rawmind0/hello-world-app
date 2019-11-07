@@ -1,11 +1,11 @@
 stages:
 - name: Build
   steps:
-  - runScriptConfig:
-      image: docker:19.03.4-dind
-      shellScript: |-
-        apk add --no-cache git make
-        make app
+  - publishImageConfig:
+      dockerfilePath: package/Dockerfile.multistage
+      buildContext: .
+      tag: rawmind/hello-world-app:${CICD_GIT_TAG}
+      registry: 127.0.0.1:34827
 - name: Deliver
   steps:
   - runScriptConfig:
