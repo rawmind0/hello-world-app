@@ -1,5 +1,4 @@
-Hello world app
-===============
+# Hello world app
 
 hello-world-app web service in 8080 port used for training and/or testing. It simply shows data about k8s deployment info and http request headers. 
 
