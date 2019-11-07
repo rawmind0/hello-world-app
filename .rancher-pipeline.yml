@@ -13,6 +13,8 @@ stages:
       shellScript: |-
         apk add --upgrade --no-cache git make bash
         make k8s_manifests
+        pwd
+        ls -l k8s
   - applyYamlConfig:
       path: k8s/hello-world-app-deployment.yaml
 timeout: 60
