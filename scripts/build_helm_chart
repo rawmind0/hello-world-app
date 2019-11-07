@@ -1,0 +1,67 @@
+#!/usr/bin/env sh
+
+if [ -z ${VERSION} ]; then
+    echo "[ERROR] VERSION is not set"
+    exit 1
+fi
+
+cat << EOF > chart/Chart.yaml
+apiVersion: v1
+appVersion: "1.0"
+description: hello-world-app helm chart for Kubernetes
+name: hello-world-app
+version: ${VERSION}
+EOF
+
+cat << EOF > chart/values.yaml
+# Default values for hello-world-app.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 2
+
+image:
+  repository: rawmind/hello-world-app
+  tag: ${VERSION}
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+nameOverride: "hello-world-app"
+fullnameOverride: "hello-world-app"
+
+service:
+  type: NodePort
+  port: 8080
+
+ingress:
+  enabled: true
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: ${SERVICE_FQDN}
+      paths: ["/"]
+
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+EOF

@@ -2,7 +2,7 @@ PKG_FILES?=$$(find . -name '*.go' |grep -v vendor)
 SERVICE_NAME?=hello-world-app
 SERVICE_FQDN?=${SERVICE_NAME}.test.dev
 SERVICE_REPLICA?=2
-VERSION=$$(scripts/version)
+VERSION=$$(sh scripts/version)
 ANSWER_VERSION=$$(curl localhost:8080/version)
 BUILDER_NAME=golang
 BUILDER_VERSION=1.12.13-alpine
@@ -10,6 +10,7 @@ DOCKER_USER?=rawmind
 DOCKER_PASS?=test
 IMAGE_NAME=${DOCKER_USER}/${SERVICE_NAME}:${VERSION}
 K8S_PATH=k8s
+K8S_APP=${K8S_PATH}/${SERVICE_NAME}-app.yaml
 K8S_DEPLOYMENT=${K8S_PATH}/${SERVICE_NAME}-deployment.yaml
 K8S_SERVICE=${K8S_PATH}/${SERVICE_NAME}-service.yaml
 K8S_INGRESS=${K8S_PATH}/${SERVICE_NAME}-ingress.yaml
@@ -80,6 +81,10 @@ publish: apptest
 	@echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
 	@docker push ${IMAGE_NAME}
 
+chart: version
+	@echo "==> Generating helm chart ${K8S_SERVICE} ..." 
+	@./scripts/build_helm_chart
+
 k8s_deploy: k8s_manifests
 	@echo "==> Generating k8s deployment file ${K8S_DEPLOYMENT} ..."
 	@kubectl apply -f ${K8S_DEPLOYMENT}
@@ -92,6 +97,11 @@ k8s_path:
 	fi
 
 k8s_manifests: k8s_deployment k8s_service k8s_ingress
+	@cat ${K8S_DEPLOYMENT} > ${K8S_APP}
+	@cat "---" >> ${K8S_APP}
+	@cat ${K8S_SERVICE} >> ${K8S_APP}
+	@cat "---" >> ${K8S_APP}
+	@cat ${K8S_INGRESS} >> ${K8S_APP}
 
 k8s_deployment: k8s_path
 	@echo "==> Generating k8s deployment file ${K8S_DEPLOYMENT} ..."

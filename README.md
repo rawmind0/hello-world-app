@@ -22,6 +22,12 @@ K8S manifests are generated under `/k8s` folder. App fqdn for ingress (default h
 
 Run `make k8s_manifests`
 
+## Generating helm chart
+
+Helm chart is generated under `/chart` folder. App fqdn for ingress (default hello-world-app.test.dev) and app replica (default: 2) can be overriden setting `SERVICE_FQDN` and `SERVICE_REPLICA` env variables.
+
+Run `make chart`
+
 ### Deployment
 
 Run `make k8s_deploy`
