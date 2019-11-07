@@ -9,9 +9,10 @@ BUILDER_VERSION=1.12.13-alpine
 DOCKER_USER?=rawmind
 DOCKER_PASS?=test
 IMAGE_NAME=${DOCKER_USER}/${SERVICE_NAME}:${VERSION}
-K8S_DEPLOYMENT=k8s/${SERVICE_NAME}-deployment.yaml
-K8S_SERVICE=k8s/${SERVICE_NAME}-service.yaml
-K8S_INGRESS=k8s/${SERVICE_NAME}-ingress.yaml
+K8S_PATH=k8s
+K8S_DEPLOYMENT=${K8S_PATH}/${SERVICE_NAME}-deployment.yaml
+K8S_SERVICE=${K8S_PATH}/${SERVICE_NAME}-service.yaml
+K8S_INGRESS=${K8S_PATH}/${SERVICE_NAME}-ingress.yaml
 
 default: app
 
@@ -85,19 +86,24 @@ k8s_deploy: k8s_manifests
 	@kubectl apply -f ${K8S_SERVICE}
 	@kubectl apply -f ${K8S_INGRESS}
 
+k8s_path: 
+	@if [ ! -d ${K8S_PATH} ]; then \
+		mkdir ${K8S_PATH}; \
+	fi
+
 k8s_manifests: k8s_deployment k8s_service k8s_ingress
 
-k8s_deployment: 
+k8s_deployment: k8s_path
 	@echo "==> Generating k8s deployment file ${K8S_DEPLOYMENT} ..."
-	@SERVICE_REPLICA=${SERVICE_REPLICA} IMAGE_NAME=${IMAGE_NAME} scripts/build_k8s_deployment > ${K8S_DEPLOYMENT}
+	@SERVICE_REPLICA=${SERVICE_REPLICA} IMAGE_NAME=${IMAGE_NAME} ./scripts/build_k8s_deployment > ${K8S_DEPLOYMENT}
 
-k8s_service: 
+k8s_service: k8s_path
 	@echo "==> Generating k8s service file ${K8S_SERVICE} ..." 
-	@scripts/build_k8s_service > ${K8S_SERVICE}
+	@./scripts/build_k8s_service > ${K8S_SERVICE}
 
-k8s_ingress: 
+k8s_ingress: k8s_path
 	@echo "==> Generating k8s ingress file ${K8S_INGRESS} ..."
-	@SERVICE_FQDN=${SERVICE_FQDN} scripts/build_k8s_ingress > ${K8S_INGRESS}
+	@SERVICE_FQDN=${SERVICE_FQDN} ./scripts/build_k8s_ingress > ${K8S_INGRESS}
 
 .PHONY: build test vet fmt fmtcheck lint version image imagetest publish k8s_manifests k8s_deploy
 
