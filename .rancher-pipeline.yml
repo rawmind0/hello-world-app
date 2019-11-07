@@ -1,0 +1,19 @@
+stages:
+- name: Build
+  steps:
+  - publishImageConfig:
+      dockerfilePath: package/Dockerfile.multistage
+      buildContext: .
+      tag: rawmind/hello-world-app
+      registry: 127.0.0.1:34410
+- name: Deliver
+  steps:
+  - runScriptConfig:
+      image: golang:1.12.13-alpine
+      shellScript: |-
+        apk add --upgrade --no-cache git make
+        make k8s_manifests
+  - applyYamlConfig:
+      path: k8s/hello-world-app-deployment.yaml
+timeout: 60
+notification: {}
