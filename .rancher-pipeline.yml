@@ -4,7 +4,7 @@ stages:
   - publishImageConfig:
       dockerfilePath: package/Dockerfile.multistage
       buildContext: .
-      tag: rawmind/hello-world-app
+      tag: rawmind/hello-world-app:${CICD_GIT_COMMIT}
       registry: 127.0.0.1:34410
 - name: Deliver
   steps:
@@ -13,6 +13,8 @@ stages:
       shellScript: |-
         apk add --upgrade --no-cache git make bash
         make k8s_manifests
+    env:
+      VERSION: ${CICD_GIT_COMMIT}
   - applyYamlConfig:
       path: k8s/hello-world-app-deployment.yaml
 timeout: 60
