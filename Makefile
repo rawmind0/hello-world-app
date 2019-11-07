@@ -85,7 +85,7 @@ k8s_deploy: k8s_manifests
 	@kubectl apply -f ${K8S_SERVICE}
 	@kubectl apply -f ${K8S_INGRESS}
 
-k8s_manifests: k8s_deploy k8s_service k8s_ingress
+k8s_manifests: k8s_deployment k8s_service k8s_ingress
 
 k8s_deployment: 
 	@echo "==> Generating k8s deployment file ${K8S_DEPLOYMENT} ..."
