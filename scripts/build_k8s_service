@@ -1,11 +1,10 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
 
 cat << EOF
 apiVersion: v1
 kind: Service
 metadata:
   name: hello-world-app-service
-  namespace: default
 spec:
   ports:
   - name: http-port

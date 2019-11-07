@@ -1,4 +1,4 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
 
 if [ -z ${IMAGE_NAME} ]; then
     echo "[ERROR] IMAGE_NAME is not set"
@@ -14,7 +14,6 @@ metadata:
   labels:
     app: hello-world-app
   name: hello-world-app
-  namespace: default
 spec:
   replicas: ${SERVICE_REPLICA}
   selector:
