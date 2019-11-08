@@ -23,8 +23,8 @@ stages:
       path: ./chart/
       catalogTemplate: hello-world-app
       version: ${CICD_GIT_TAG}
-      gitUrl: https://rawmind0.github.io/hello-helm
-      gitBranch: master
+      gitUrl: https://github.com/rawmind0/hello-helm
+      gitBranch: gh-pages
       gitAuthor: rawmind0
       gitEmail: rawmind@gmail.com
     env:
