@@ -20,7 +20,7 @@ stages:
   - applyYamlConfig:
       path: k8s/hello-world-app-app.yaml
   - publishCatalogConfig:
-      path: ./chart/
+      path: ./charts/
       catalogTemplate: hello-world-app
       version: ${CICD_GIT_TAG}
       gitUrl: https://github.com/rawmind0/hello-helm
