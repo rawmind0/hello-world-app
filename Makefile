@@ -98,9 +98,9 @@ k8s_path:
 
 k8s_manifests: k8s_deployment k8s_service k8s_ingress
 	@cat ${K8S_DEPLOYMENT} > ${K8S_APP}
-	@cat "---" >> ${K8S_APP}
+	@echo "---" >> ${K8S_APP}
 	@cat ${K8S_SERVICE} >> ${K8S_APP}
-	@cat "---" >> ${K8S_APP}
+	@echo "---" >> ${K8S_APP}
 	@cat ${K8S_INGRESS} >> ${K8S_APP}
 
 k8s_deployment: k8s_path
