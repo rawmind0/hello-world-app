@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-if [ -z ${VERSION} ]; then
+if [ -z "${VERSION}" ]; then
     echo "[ERROR] VERSION is not set"
     exit 1
 fi
