@@ -6,6 +6,10 @@ stages:
       buildContext: .
       tag: rawmind/hello-world-app:${CICD_GIT_TAG}
       registry: 127.0.0.1:34827
+    when:
+      event:
+        include:
+        - tag
 - name: Deliver
   steps:
   - runScriptConfig:
@@ -15,20 +19,26 @@ stages:
         make k8s_manifests
     env:
       VERSION: $(sh scripts/version)
+    when:
+      event:
+        include:
+        - tag
 - name: Deploy
   steps:
   - applyYamlConfig:
       path: k8s/hello-world-app-app.yaml
+    when:
+      event:
+        include:
+        - tag
   - publishCatalogConfig:
-      path: ./charts/hello-world-app/${VERSION}
+      path: ./charts/hello-world-app/${CICD_GIT_TAG}
       catalogTemplate: hello-world-app
-      version: ${VERSION}
+      version: ${CICD_GIT_TAG}
       gitUrl: https://github.com/rawmind0/hello-helm
       gitBranch: master
       gitAuthor: rawmind0
       gitEmail: rawmind@gmail.com
-    env:
-      VERSION: $(sh scripts/version)
     envFrom:
     - sourceName: rawmind-github
       sourceKey: USERNAME
