@@ -4,7 +4,7 @@ stages:
   - publishImageConfig:
       dockerfilePath: package/Dockerfile.multistage
       buildContext: .
-      tag: rawmind/hello-world-app:$(sh scripts/version)
+      tag: rawmind/hello-world-app:${CICD_GIT_TAG}
       registry: 127.0.0.1:34827
 - name: Deliver
   steps:
@@ -15,7 +15,30 @@ stages:
         make k8s_manifests
     env:
       VERSION: $(sh scripts/version)
+- name: Deploy
+  steps:
   - applyYamlConfig:
-      path: k8s/hello-world-app-deployment.yaml
+      path: k8s/hello-world-app-app.yaml
+  - publishCatalogConfig:
+      path: ./chart/
+      catalogTemplate: hello-world-app
+      version: ${CICD_GIT_TAG}
+      gitUrl: https://rawmind0.github.io/hello-helm
+      gitBranch: master
+      gitAuthor: rawmind0
+      gitEmail: rawmind@gmail.com
+    env:
+      VERSION: $(sh scripts/version)
+    envFrom:
+    - sourceName: rawmind-github
+      sourceKey: USERNAME
+      targetKey: USERNAME
+    - sourceName: rawmind-github
+      sourceKey: PASSWORD
+      targetKey: PASSWORD
+    when:
+      event:
+        include:
+        - tag
 timeout: 60
 notification: {}
