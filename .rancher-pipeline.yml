@@ -24,7 +24,7 @@ stages:
       catalogTemplate: hello-world-app
       version: ${CICD_GIT_TAG}
       gitUrl: https://github.com/rawmind0/hello-helm
-      gitBranch: gh-pages
+      gitBranch: master
       gitAuthor: rawmind0
       gitEmail: rawmind@gmail.com
     env:
