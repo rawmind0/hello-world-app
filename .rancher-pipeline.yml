@@ -31,24 +31,5 @@ stages:
       event:
         include:
         - tag
-  - publishCatalogConfig:
-      path: ./charts/hello-world-app/${CICD_GIT_TAG}
-      catalogTemplate: hello-world-app
-      version: ${CICD_GIT_TAG}
-      gitUrl: https://github.com/rawmind0/hello-helm
-      gitBranch: master
-      gitAuthor: rawmind0
-      gitEmail: rawmind@gmail.com
-    envFrom:
-    - sourceName: rawmind-github
-      sourceKey: USERNAME
-      targetKey: USERNAME
-    - sourceName: rawmind-github
-      sourceKey: PASSWORD
-      targetKey: PASSWORD
-    when:
-      event:
-        include:
-        - tag
 timeout: 60
 notification: {}
