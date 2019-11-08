@@ -83,7 +83,7 @@ publish: apptest
 
 chart: version
 	@echo "==> Generating helm chart ${K8S_SERVICE} ..." 
-	@VERSION=${VERSION} scripts/build_helm_chart
+	@VERSION=${VERSION} SERVICE_NAME=${SERVICE_NAME} scripts/build_helm_chart
 
 k8s_deploy: k8s_manifests
 	@echo "==> Generating k8s deployment file ${K8S_DEPLOYMENT} ..."

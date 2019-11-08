@@ -1,11 +1,18 @@
 #!/usr/bin/env sh
 
+if [ -z "${SERVICE_NAME}" ]; then
+    echo "[ERROR] SERVICE_NAME is not set"
+    exit 1
+fi
+
 if [ -z "${VERSION}" ]; then
     echo "[ERROR] VERSION is not set"
     exit 1
 fi
 
-cat << EOF > chart/Chart.yaml
+cp -rp charts/${SERVICE_NAME}/initial charts/${SERVICE_NAME}/${VERSION}
+
+cat << EOF > charts/${SERVICE_NAME}/${VERSION}/Chart.yaml
 apiVersion: v1
 appVersion: "1.0"
 description: hello-world-app helm chart for Kubernetes
@@ -13,7 +20,7 @@ name: hello-world-app
 version: ${VERSION}
 EOF
 
-cat << EOF > chart/values.yaml
+cat << EOF > charts/${SERVICE_NAME}/${VERSION}/values.yaml
 # Default values for hello-world-app.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
