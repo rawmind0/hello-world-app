@@ -8,7 +8,7 @@ fi
 SERVICE_REPLICA=${SERVICE_REPLICA:-2}
 
 cat << EOF
-apiVersion: apps/v1beta2
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:

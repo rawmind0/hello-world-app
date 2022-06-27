@@ -1,4 +1,4 @@
-FROM golang:1.12.13-alpine as builder
+FROM golang:1.17.7-alpine as builder
 
 ARG SERVICE_NAME=hello-world-app
 ARG SERVICE_HOME=/opt/${SERVICE_NAME}
@@ -14,7 +14,7 @@ RUN env && \
     make test && \
     make build
 
-FROM rawmind/alpine-base:3.10-1
+FROM rawmind/alpine-base:3.15-2
 
 ARG SERVICE_NAME=hello-world-app
 ARG SERVICE_HOME=/opt/${SERVICE_NAME}

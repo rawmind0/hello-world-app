@@ -1,4 +1,4 @@
-FROM rawmind/alpine-base:3.10-1
+FROM rawmind/alpine-base:3.15-2
 MAINTAINER Raul Sanchez <rawmind@gmail.com>
 
 ARG SERVICE_NAME=hello-world-app

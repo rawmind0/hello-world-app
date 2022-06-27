@@ -6,7 +6,7 @@ if [ -z "${SERVICE_FQDN}" ]; then
 fi
 
 cat << EOF
-apiVersion: extensions/v1beta1
+apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: hello-world-app-ingress
@@ -15,8 +15,11 @@ spec:
   - host: ${SERVICE_FQDN}
     http:
       paths:
-      - backend:
-          serviceName: hello-world-app-service
-          servicePort: http-port
-        path: /
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: hello-world-app-service
+            port:
+              number: http-port
 EOF
