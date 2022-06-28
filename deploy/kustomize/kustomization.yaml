@@ -1,0 +1,4 @@
+resources:
+- manifests/deployment.yaml
+- manifests/ingress.yaml
+- manifests/service.yaml

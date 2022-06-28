@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: hello-world
+  name: hello-world
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: hello-world
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: hello-world
+    spec:
+      containers:
+      - image: rawmind/hello-world-app:0.0.3
+        imagePullPolicy: Always
+        name: hello-world
+        ports:
+        - name: http-port
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: MY_NODE_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.hostIP
+        livenessProbe:
+          tcpSocket:
+            port: http-port
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http-port
+          initialDelaySeconds: 15
+          periodSeconds: 20
